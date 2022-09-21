@@ -1,0 +1,12 @@
+__pycache__
+__init__
+references/
+*.aux 
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls 
+*.log
+*.out
+*.synctex.gz
+.vscode/*
