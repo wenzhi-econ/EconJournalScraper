@@ -45,11 +45,11 @@ def get_issue_articles(issue_url):
     soup = BeautifulSoup(html, "html.parser")
     articles = {}
 
-    for tag in soup.find_all("h4", class_="issue-item__title"):
+    for tag in soup.find_all("div", class_="issue-item"):
         a = tag.find("a", href=True)
         if a and a.text.strip():
             title = a.text.strip()
-            if title.lower() in ["front matter", "jpe turnaround times", "recent referees"]:
+            if title.lower().startswith(("frontmatter", "backmatter")):
                 continue
             link = requests.compat.urljoin(issue_url, a["href"].strip())
             articles[title] = link
@@ -103,18 +103,17 @@ def scrape_paper_info(article_url):
         except Exception:
             return default
 
-    title = safe_extract(
-        lambda: soup.find("h1", {"class": "citation__title"}).get_text(strip=True)
-    )
+    title = safe_extract(lambda: soup.find("h1", class_="citation__title").get_text(strip=True))
     abstract = safe_extract(
-        lambda: soup.find("div", class_="abstractSection abstractInFull")
+        lambda: soup.find("div", class_=lambda x: x and x.startswith("article-section__content"))
         .get_text(strip=True)
         .replace("Abstract", "")
     )
-    doi = safe_extract(lambda: soup.find(class_="doi__text").get_text(strip=True))
+    doi = safe_extract(lambda: soup.find(class_="epub-doi").get_text(strip=True))
     pdf_link = safe_extract(
         lambda: requests.compat.urljoin(
-            article_url, soup.find("a", {"aria-label": " PDF"}, href=True)["href"]
+            article_url,
+            soup.find("a", {"class": "coolBar__ctrl pdf-download"}, href=True)["href"],
         )
     )
 
@@ -206,7 +205,7 @@ def scrape_issue_to_markdown(issue_url, md_path):
 
 
 if __name__ == "__main__":
-    test_issue = "https://www.journals.uchicago.edu/toc/jpe/2025/133/6"
+    test_issue = "https://onlinelibrary.wiley.com/toc/14680262/2025/93/3"
     issue_info = get_issue_articles(test_issue)
-    test_paper = "https://www.journals.uchicago.edu/doi/10.1086/734778"
+    test_paper = "https://onlinelibrary.wiley.com/doi/10.3982/ECTA22303"
     article_info = scrape_paper_info(test_paper)

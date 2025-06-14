@@ -45,11 +45,11 @@ def get_issue_articles(issue_url):
     soup = BeautifulSoup(html, "html.parser")
     articles = {}
 
-    for tag in soup.find_all("h4", class_="issue-item__title"):
+    for tag in soup.find_all("h5", class_="customLink item-title"):
         a = tag.find("a", href=True)
         if a and a.text.strip():
             title = a.text.strip()
-            if title.lower() in ["front matter", "jpe turnaround times", "recent referees"]:
+            if title.lower() in ["front matter", "acknowledge of referees"]:
                 continue
             link = requests.compat.urljoin(issue_url, a["href"].strip())
             articles[title] = link
@@ -103,18 +103,20 @@ def scrape_paper_info(article_url):
         except Exception:
             return default
 
-    title = safe_extract(
-        lambda: soup.find("h1", {"class": "citation__title"}).get_text(strip=True)
-    )
+    title = safe_extract(lambda: soup.find("h1").get_text(strip=True))
     abstract = safe_extract(
-        lambda: soup.find("div", class_="abstractSection abstractInFull")
+        lambda: soup.find("section", class_="abstract")
+        .find("p", class_="chapter-para")
         .get_text(strip=True)
         .replace("Abstract", "")
     )
-    doi = safe_extract(lambda: soup.find(class_="doi__text").get_text(strip=True))
+    doi = safe_extract(
+        lambda: soup.find(class_="ww-citation-primary").find("a", href=True).get_text(strip=True)
+    )
     pdf_link = safe_extract(
         lambda: requests.compat.urljoin(
-            article_url, soup.find("a", {"aria-label": " PDF"}, href=True)["href"]
+            article_url,
+            soup.find("a", {"class": "al-link pdf article-pdfLink"}, href=True)["href"],
         )
     )
 
@@ -206,7 +208,7 @@ def scrape_issue_to_markdown(issue_url, md_path):
 
 
 if __name__ == "__main__":
-    test_issue = "https://www.journals.uchicago.edu/toc/jpe/2025/133/6"
+    test_issue = "https://academic.oup.com/qje/issue"
     issue_info = get_issue_articles(test_issue)
-    test_paper = "https://www.journals.uchicago.edu/doi/10.1086/734778"
+    test_paper = "https://academic.oup.com/qje/article/140/2/835/7933323"
     article_info = scrape_paper_info(test_paper)
