@@ -1,3 +1,17 @@
+"""
+This script file presents the usage of the scrapers stored in the codes/util folder.
+- scraper_aea can be used for all AEA-journals, e.g., AER, JEP, AEJMacro.
+- scraper_jpe can be used for journals in associated with the Chicago Press, e.g., JPE, JOLE
+- scraper_oxford can be used for journals in associated with the Oxford Press, e.g., REStud, QJE
+- scraper_wiley can be used for journals in associated with the Wiley Press, e.g., ECMA, IER, QE
+
+The key input is the issue webpage for a journal.
+The outputs are markdown files storing the title, abstract, doi, pdf link, and paper link.
+
+Author: Wang Wenzhi
+Time: Tests take place in 2025-06-13.
+"""
+
 from util.scraper_aea import scrape_issue_to_markdown as scrape_aea
 from util.scraper_jpe import scrape_issue_to_markdown as scrape_jpe
 from util.scraper_oxford import scrape_issue_to_markdown as scrape_oxford
